@@ -6,11 +6,14 @@ import java.sql.SQLException;
 public interface IUserDAO {
     public void insertUser(User user) throws SQLException;
 
-    public User selectUser(int id);
+    public User selectUsers(int id);
 
     public List<User> selectAllUsers();
+    public List<User> selectAllUsersOrdered();
 
     public boolean deleteUser(int id) throws SQLException;
 
     public boolean updateUser(User user) throws SQLException;
+
+    public List<User> selectUsers(String country);
 }
