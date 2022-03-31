@@ -2,14 +2,16 @@ package com.codegym.dao;
 
 import com.codegym.model.User;
 
+import java.math.BigDecimal;
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class UserDAO implements IUserDAO{
     private String jdbcURL = "jdbc:mysql://localhost:3306/quanlyuser?useSSL=false";
     private String jdbcUsername = "root";
-    private String jdbcPassword = "zzzzz";
+    private String jdbcPassword = "Journalist251195";
 
     private static final String INSERT_USERS_SQL = "INSERT INTO users (name, email, country) VALUES (?, ?, ?);";
     private static final String SELECT_USER_BY_ID = "select id,name,email,country from users where id =?";
@@ -18,6 +20,19 @@ public class UserDAO implements IUserDAO{
     private static final String SELECT_ALL_USERS_ORDER_BY_NAME = "select * from users order by name";
     private static final String DELETE_USERS_SQL = "delete from users where id = ?;";
     private static final String UPDATE_USERS_SQL = "update users set name = ?,email= ?, country =? where id = ?;";
+
+    private static final String SQL_INSERT = "INSERT INTO EMPLOYEE (NAME, SALARY, CREATED_DATE) VALUES (?,?,?)";
+    private static final String SQL_UPDATE = "UPDATE EMPLOYEE SET SALARY=? WHERE NAME=?";
+    private static final String SQL_TABLE_CREATE = "CREATE TABLE EMPLOYEE"
+            + "("
+            + " ID serial,"
+            + " NAME varchar(100) NOT NULL,"
+            + " SALARY numeric(15, 2) NOT NULL,"
+            + " CREATED_DATE timestamp,"
+            + " PRIMARY KEY (ID)"
+            + ")";
+
+    private static final String SQL_TABLE_DROP = "DROP TABLE IF EXISTS EMPLOYEE";
 
     public UserDAO() {
     }
@@ -291,6 +306,35 @@ public class UserDAO implements IUserDAO{
             } catch (SQLException e) {
                 System.out.println(e.getMessage());
             }
+        }
+    }
+    @Override
+
+    public void insertUpdateWithoutTransaction() {
+        try (Connection conn = getConnection();
+             Statement statement = conn.createStatement();
+             PreparedStatement psInsert = conn.prepareStatement(SQL_INSERT);
+             PreparedStatement psUpdate = conn.prepareStatement(SQL_UPDATE)) {
+            statement.execute(SQL_TABLE_DROP);
+            statement.execute(SQL_TABLE_CREATE);
+            // Run list of insert commands
+            psInsert.setString(1, "Quynh");
+            psInsert.setBigDecimal(2, new BigDecimal(10));
+            psInsert.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
+            psInsert.execute();
+            psInsert.setString(1, "Ngan");
+            psInsert.setBigDecimal(2, new BigDecimal(20));
+            psInsert.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
+            psInsert.execute();
+            // Run list of update commands
+            // below line caused error, test transaction
+            // org.postgresql.util.PSQLException: No value specified for parameter 1.
+            psUpdate.setBigDecimal(2, new BigDecimal(999.99));
+            //psUpdate.setBigDecimal(1, new BigDecimal(999.99));
+            psUpdate.setString(2, "Quynh");
+            psUpdate.execute();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
